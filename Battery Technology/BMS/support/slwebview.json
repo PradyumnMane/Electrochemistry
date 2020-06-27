@@ -1,0 +1,33 @@
+{
+ "baseUrl":"support/slwebview_files",
+ "homeHid":1,
+ "initialElement":"",
+ "sections":[
+  {
+   "hid":1,
+   "sid":"BMS_analysis",
+   "name":"BMS_analysis",
+   "fullname":"BMS_analysis",
+   "label":"BMS_analysis",
+   "parent":0,
+   "descendants":[
+    2,
+    3,
+    4
+   ],
+   "hierarchyUrl":"support/slwebview_files/BMS_analysis_h_1.json",
+   "backingUrl":"support/slwebview_files/BMS_analysis_m.json"
+  }
+ ],
+ "optViews":[
+  {
+   "id":"requirements",
+   "name":"Requirements",
+   "icon":"WebViewIcon5"
+  }
+ ],
+ "display":{
+  "informer":true
+ },
+ "iconsUrl":"support/slwebview_files/BMS_analysis_icons.css"
+}

@@ -1,0 +1,94 @@
+/**
+ * Copyright (c) 1998-2014 by COMSOL AB
+ * $Revision: $  $Date: $
+ */
+"use strict";
+if ( ! window.COMSOL ) {
+	window.COMSOL = {};
+}
+
+/*
+ * Function that tries to find the DOM-element corresponding to certain RWT-widget's id. 
+ * If it finds the DOM-element, it calls the given callback-function with found element 
+ * as first argument.
+ */
+// This function depends on some internal RWT-API that is not guaranteed to be stable, 
+// and because of that this function might need changes when updating RWT
+COMSOL.runOnElement = function(id, callback) {
+	var starter, applier, element, widg, addedListener = false,
+		tries = 5; // the element is not necessarily immediately available, try again a few times
+	
+	applier = function() {
+		if ( widg && widg.getElement() ) { // internal RWT-API
+			element = widg.getElement();
+			if ( callback && Object.prototype.toString.call(callback) == '[object Function]') {
+				callback.call(undefined, element, widg);
+			}
+			if ( addedListener ) {
+				widg.removeEventListener("appear", applier, widg);
+			}
+		} else {
+			if ( tries > 0) {
+				tries--;
+				window.setTimeout(applier, 300);
+			} else {
+				if ( addedListener ) {
+					widg.removeEventListener("appear", applier, widg);
+				}
+				return;
+			}
+		}
+	};
+	
+	starter = function() {
+		if ( window.rwt) {
+			var rwtWidg = rwt.remote.ObjectRegistry.getEntry(id); // internal RWT-API
+			if ( rwtWidg == null || rwtWidg.object == null ) {
+				if ( tries > 0) {
+					tries--;
+					window.setTimeout(starter, 300);
+				} else {
+					return;
+				}
+			} else {
+				// internal RWT-API
+				widg = rwtWidg.object;
+				if ( widg.isSeeable() ) {
+					applier();
+				} else {
+					addedListener = true;
+					widg.addEventListener("appear", applier, widg);
+				}
+			}
+		}
+	}
+	
+	starter();
+};
+
+/** Set the given CSS class and theme name to the DOM element with the given RWT id. */
+COMSOL.setCssClass = function(id, theme, cssClass) {
+  COMSOL.runOnElement(id, function(element) {
+    if (element) {
+      element.className = cssClass + " " + theme;
+    } else {
+      return;
+    }
+  });
+};
+
+/*
+ * Function overriding css-attributes controlling background image sizing and position 
+ * of the DOM-element corresponding to given RWT-widget's id
+ */
+COMSOL.setBgMode = function(id, repeat, positionX, positionY, sizeX, sizeY) {
+	var applier = function(foundElem) {
+		if ( foundElem && foundElem.style ) {
+			foundElem.style.backgroundRepeat = "" + repeat;
+			foundElem.style.backgroundPosition = positionX + " " + positionY;
+			foundElem.style.backgroundSize = sizeX + " " + sizeY;
+		}
+	};
+
+	COMSOL.runOnElement(id, applier);
+};
